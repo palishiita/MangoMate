@@ -8,4 +8,4 @@
 
 ## Server
 
-## AI Model
+## Machine Learning Model
