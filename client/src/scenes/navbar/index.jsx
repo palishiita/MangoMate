@@ -1,3 +1,4 @@
+/*client/src/scenes/navbar/index.jsx*/ 
 import { useState } from "react";
 import {
   Box,
@@ -54,9 +55,14 @@ const Navbar = () => {
               color: primaryLight,
               cursor: "pointer",
             },
+            display: 'inline', // Add this line to ensure inline display with the image
+            verticalAlign: 'middle', // Add this line to align text vertically
+            marginLeft: 'auto', // Add this line to push the text towards center
+            marginRight: 'auto' // Add this line to push the text towards center
           }}
         >
-          Sociopedia
+          <img src="../assets/mango.png" alt="Mango Mate Logo" style={{ maxWidth: "75px" }} />
+          MangoMate!
         </Typography>
         {isNonMobileScreens && (
           <FlexBetween

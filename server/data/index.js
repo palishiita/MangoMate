@@ -1,4 +1,7 @@
 // server/data/index.js
+
+// using mongoose to input data (users and post)
+
 import mongoose from "mongoose";
 
 const userIds = [

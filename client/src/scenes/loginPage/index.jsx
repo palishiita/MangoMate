@@ -1,10 +1,21 @@
-//client/src/scenes/loginPage/index.jsx
+/*client/src/scenes/loginPage/index.jsx*/
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
-import Form from "./Form";
+import Form from "./Form"; 
+import React, { useRef } from "react";
+import "./index.css"; 
 
 const LoginPage = () => {
   const theme = useTheme();
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const textRef = useRef(null);
+
+  const handlePullDown = (e) => {
+    const deltaY = e.nativeEvent.deltaY;
+    const currentFontSize = parseFloat(window.getComputedStyle(textRef.current).fontSize);
+    const newFontSize = currentFontSize + deltaY * 0.1; // Adjust the factor for the desired increase rate
+    textRef.current.style.fontSize = `${newFontSize}px`;
+  };
+
   return (
     <Box>
       <Box
@@ -13,7 +24,15 @@ const LoginPage = () => {
         p="1rem 6%"
         textAlign="center"
       >
-        <Typography fontWeight="bold" fontSize="32px" color="primary">
+        <img src="../assets/mango-logo.png" alt="Mango Mate Logo" style={{ maxWidth: "150px" }} />
+        <Typography 
+          ref={textRef}
+          fontWeight="bold" 
+          fontSize="32px" 
+          color="primary"
+          onWheel={handlePullDown}
+          className="pullable-section"
+        >
           MangoMate!
         </Typography>
       </Box>

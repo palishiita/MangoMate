@@ -1,7 +1,7 @@
+// client/src/scenes/widgets/MyPostWidget.jsx
 import {
   EditOutlined,
   DeleteOutlined,
-  AttachFileOutlined,
   GifBoxOutlined,
   ImageOutlined,
   MicOutlined,
@@ -67,9 +67,9 @@ const MyPostWidget = ({ picturePath }) => {
           value={post}
           sx={{
             width: "100%",
-            backgroundColor: palette.neutral.light,
-            borderRadius: "2rem",
-            padding: "1rem 2rem",
+            backgroundColor: palette.grey[200], // Set background color to grey
+            borderRadius: "0.5rem", // Adjust border radius as needed
+            padding: "1rem", // Adjust padding as needed
           }}
         />
       </FlexBetween>
@@ -136,11 +136,6 @@ const MyPostWidget = ({ picturePath }) => {
             <FlexBetween gap="0.25rem">
               <GifBoxOutlined sx={{ color: mediumMain }} />
               <Typography color={mediumMain}>Clip</Typography>
-            </FlexBetween>
-
-            <FlexBetween gap="0.25rem">
-              <AttachFileOutlined sx={{ color: mediumMain }} />
-              <Typography color={mediumMain}>Attachment</Typography>
             </FlexBetween>
 
             <FlexBetween gap="0.25rem">
