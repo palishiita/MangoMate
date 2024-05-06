@@ -46,29 +46,33 @@ const UserWidget = ({ userId, picturePath }) => {
   };
 
   const saveChanges = async () => {
-      console.log("Saving changes with data:", formData);
-      try {
-          const response = await fetch(`http://localhost:3001/users/${userId}`, {
-              method: 'PATCH',
-              headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`
-              },
-              body: JSON.stringify(formData)
-          });
-          if (!response.ok) {
-              throw new Error('Failed to update user details');
-          }
-          const updatedUser = await response.json();
-          setUser(updatedUser);
-          setEditMode(false);
-          console.log('Update successful', updatedUser);
-      } catch (error) {
-          console.error('Failed to save changes:', error);
+    console.log("Saving changes with data:", formData);
+    try {
+      const response = await fetch(`http://localhost:3001/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          location: formData.location,
+          occupation: formData.occupation
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update user details');
       }
-    };
-
-
+      const updatedUser = await response.json();
+      setUser(updatedUser); // Update local state with the new user data
+      setEditMode(false);   // Exit edit mode
+      console.log('Update successful', updatedUser);
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+    }
+  };
+  
   if (!user) return null;
 
   return (
