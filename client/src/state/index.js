@@ -22,6 +22,7 @@ export const authSlice = createSlice({
     setLogout: (state) => {
       state.user = null;
       state.token = null;
+      state.posts = [];  // Clearing posts on logout as well
     },
     setFriends: (state, action) => {
       if (state.user) {
@@ -40,9 +41,32 @@ export const authSlice = createSlice({
       });
       state.posts = updatedPosts;
     },
+    updateUserDetails: (state, action) => {
+      // Check if there is a user to update
+      if (state.user) {
+        const { firstName, lastName, location, occupation } = action.payload;
+        state.user = {
+          ...state.user,
+          firstName: firstName || state.user.firstName,
+          lastName: lastName || state.user.lastName,
+          location: location || state.user.location,
+          occupation: occupation || state.user.occupation,
+        };
+      } else {
+        console.error("No user to update");
+      }
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
-  authSlice.actions;
+export const { 
+  setMode, 
+  setLogin, 
+  setLogout, 
+  setFriends, 
+  setPosts, 
+  setPost, 
+  updateUserDetails 
+} = authSlice.actions;
+
 export default authSlice.reducer;
