@@ -1,3 +1,4 @@
+// client/src/scenes/widgets/PostWidget.jsx
 import {
   ChatBubbleOutlineOutlined,
   ShareOutlined,
@@ -9,8 +10,10 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
-import mangoUnlikedIcon from "./mango-unliked.png"; // Import the mango-unliked icon
-import mangoLikedIcon from "./mango-liked.png"; // Import the mango-liked icon
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
+import mangoUnlikedIcon from "./mango-unliked.png";
+import mangoLikedIcon from "./mango-liked.png";
 
 const PostWidget = ({
   postId,
@@ -24,16 +27,15 @@ const PostWidget = ({
   comments,
 }) => {
   const [isComments, setIsComments] = useState(false);
-  const [newComment, setNewComment] = useState(""); // State to store the new comment
-  const [replyIndex, setReplyIndex] = useState(-1); // State to store the index of the comment being replied to
-  const [replyText, setReplyText] = useState(""); // State to store the reply text
+  const [newComment, setNewComment] = useState("");
+  const [replyIndex, setReplyIndex] = useState(-1);
+  const [replyText, setReplyText] = useState("");
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
-
-  const primaryColor = "#F4BB44"; // Mango color
+  const primaryColor = "#F4BB44";
 
   const patchLike = async () => {
     const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
@@ -48,31 +50,19 @@ const PostWidget = ({
     dispatch(setPost({ post: updatedPost }));
   };
 
-  const handleCommentChange = (event) => {
-    setNewComment(event.target.value);
-  };
-
-  const handleReplyChange = (event) => {
-    setReplyText(event.target.value);
-  };
+  const handleCommentChange = (event) => setNewComment(event.target.value);
+  const handleReplyChange = (event) => setReplyText(event.target.value);
 
   const handlePostComment = () => {
-    // Logic to post comment
-    console.log("New comment:", newComment);
-    // You can send the new comment to the backend here
-    setNewComment(""); // Clear the comment input field after posting
+    // Add your backend comment posting logic here
+    setNewComment("");
   };
 
-  const handleReply = (index) => {
-    setReplyIndex(index);
-  };
-
+  const handleReply = (index) => setReplyIndex(index);
   const handlePostReply = () => {
-    // Logic to post reply
-    console.log("Reply to comment at index", replyIndex, ":", replyText);
-    // You can send the reply text and index to the backend here
-    setReplyIndex(-1); // Reset the reply index
-    setReplyText(""); // Clear the reply input field
+    // Add your backend reply posting logic here
+    setReplyIndex(-1);
+    setReplyText("");
   };
 
   return (
@@ -86,7 +76,9 @@ const PostWidget = ({
       <Typography color="text.primary" sx={{ mt: "1rem" }}>
         {description}
       </Typography>
-      {picturePath && (
+
+      {/* Display Image */}
+      {picturePath && picturePath.match(/\.(jpeg|jpg|png)$/) && (
         <img
           width="100%"
           height="auto"
@@ -95,6 +87,28 @@ const PostWidget = ({
           src={`http://localhost:3001/assets/${picturePath}`}
         />
       )}
+
+      {/* Display Video */}
+      {picturePath && picturePath.match(/\.(mp4|avi)$/) && (
+        <video
+          width="100%"
+          height="auto"
+          controls
+          style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
+          src={`http://localhost:3001/assets/${picturePath}`}
+        />
+      )}
+
+      {/* Display Audio */}
+      {picturePath && picturePath.match(/\.(mp3|wav)$/) && (
+        <AudioPlayer
+          src={`http://localhost:3001/assets/${picturePath}`}
+          style={{ marginTop: "0.75rem", width: "100%" }}
+          layout="stacked-reverse"
+        />
+      )}
+
+      {/* Likes and Comments Section */}
       <FlexBetween mt="0.25rem">
         <FlexBetween gap="1rem">
           <FlexBetween gap="0.3rem">
@@ -116,11 +130,13 @@ const PostWidget = ({
           <ShareOutlined />
         </IconButton>
       </FlexBetween>
+
+      {/* Comments Section */}
       {isComments && (
         <Box mt="0.5rem">
-          {comments.map((comment, i) => (
+          {comments.map((comment, index) => (
             <Box
-              key={`${name}-${i}`}
+              key={index}
               sx={{
                 backgroundColor: primaryColor,
                 borderRadius: "10px",
@@ -134,21 +150,54 @@ const PostWidget = ({
               }}
             >
               <Typography>{comment}</Typography>
-              {/* Reply Input */}
-              {replyIndex === i && (
+              {replyIndex === index && (
                 <Box mt="1rem" display="flex" alignItems="center">
                   <InputBase
                     placeholder="Reply..."
                     value={replyText}
                     onChange={handleReplyChange}
-                    sx={{ flexGrow: 1, mr: "1rem", borderRadius: "10px", backgroundColor: "#E0E0E0", p: "0.5rem", fontSize: "14px" }}
+                    sx={{
+                      flexGrow: 1,
+                      mr: "1rem",
+                      borderRadius: "10px",
+                      backgroundColor: "#E0E0E0",
+                      p: "0.5rem",
+                      fontSize: "14px",
+                    }}
                   />
-                  <Button variant="contained" onClick={handlePostReply} sx={{ backgroundColor: primaryColor, color: "white", borderRadius: "5px", fontSize: "12px", height: "30px", py: 0 }}>POST</Button>
+                  <Button
+                    variant="contained"
+                    onClick={handlePostReply}
+                    sx={{
+                      backgroundColor: primaryColor,
+                      color: "white",
+                      borderRadius: "5px",
+                      fontSize: "12px",
+                      height: "30px",
+                      py: 0,
+                    }}
+                  >
+                    POST
+                  </Button>
                 </Box>
               )}
-              {/* Reply Button */}
-              {replyIndex !== i && (
-                <Button onClick={() => handleReply(i)} sx={{ position: "absolute", bottom: "10px", right: "10px", backgroundColor: "#FFF", color: primaryColor, borderRadius: "5px", fontSize: "12px", padding: "5px", height: "24px" }}>Reply</Button>
+              {replyIndex !== index && (
+                <Button
+                  onClick={() => handleReply(index)}
+                  sx={{
+                    position: "absolute",
+                    bottom: "10px",
+                    right: "10px",
+                    backgroundColor: "#FFF",
+                    color: primaryColor,
+                    borderRadius: "5px",
+                    fontSize: "12px",
+                    padding: "5px",
+                    height: "24px",
+                  }}
+                >
+                  Reply
+                </Button>
               )}
             </Box>
           ))}
@@ -158,9 +207,29 @@ const PostWidget = ({
               placeholder="Add a comment..."
               value={newComment}
               onChange={handleCommentChange}
-              sx={{ flexGrow: 1, mr: "1rem", borderRadius: "10px", backgroundColor: "#E0E0E0", p: "0.5rem", fontSize: "14px" }}
+              sx={{
+                flexGrow: 1,
+                mr: "1rem",
+                borderRadius: "10px",
+                backgroundColor: "#E0E0E0",
+                p: "0.5rem",
+                fontSize: "14px",
+              }}
             />
-            <Button variant="contained" onClick={handlePostComment} sx={{ backgroundColor: primaryColor, color: "white", borderRadius: "5px", fontSize: "12px", height: "30px", py: 0 }}>POST</Button>
+            <Button
+              variant="contained"
+              onClick={handlePostComment}
+              sx={{
+                backgroundColor: primaryColor,
+                color: "white",
+                borderRadius: "5px",
+                fontSize: "12px",
+                height: "30px",
+                py: 0,
+              }}
+            >
+              POST
+            </Button>
           </Box>
         </Box>
       )}

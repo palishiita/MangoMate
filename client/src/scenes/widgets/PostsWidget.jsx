@@ -15,8 +15,20 @@ const PostsWidget = ({ userId, isProfile = false }) => {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    // Safeguard against invalid responses
+    if (!response.ok) {
+      console.error(`Failed to fetch posts: ${response.statusText}`);
+      return;
+    }
+
     const data = await response.json();
-    dispatch(setPosts({ posts: data }));
+    // Ensure data is an array before dispatching
+    if (Array.isArray(data)) {
+      dispatch(setPosts({ posts: data }));
+    } else {
+      console.error("Expected an array but received:", data);
+    }
   };
 
   const getUserPosts = async () => {
@@ -41,7 +53,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
 
   return (
     <>
-      {posts.map(
+      {Array.isArray(posts) && posts.map(
         ({
           _id,
           userId,

@@ -3,10 +3,30 @@ import Post from "../models/Post.js";
 import User from "../models/User.js";
 
 /* CREATE */
+// server/controllers/posts.js
+
 export const createPost = async (req, res) => {
   try {
-    const { userId, description, picturePath } = req.body;
+    const { userId, description } = req.body;
+    // Extract filename from the uploaded file
+    const picturePath = req.file ? req.file.filename : req.body.picturePath;
+
+    // Log received data for debugging
+    console.log("Received Data:", { userId, description, picturePath });
+
+    // Check if any required field is missing
+    if (!userId || !description || !picturePath) {
+      console.error("Missing required fields for post creation:", { userId, description, picturePath });
+      return res.status(409).json({ message: "Missing required fields for post creation." });
+    }
+
+    // Fetch the user
     const user = await User.findById(userId);
+    if (!user) {
+      return res.status(409).json({ message: "User not found." });
+    }
+
+    // Create a new post
     const newPost = new Post({
       userId,
       firstName: user.firstName,
@@ -14,16 +34,18 @@ export const createPost = async (req, res) => {
       location: user.location,
       description,
       userPicturePath: user.picturePath,
-      picturePath,
+      picturePath, // Set the multimedia file path
       likes: {},
       comments: [],
     });
-    await newPost.save();
 
-    const post = await Post.find();
-    res.status(201).json(post);
+    // Save and return all posts
+    await newPost.save();
+    const posts = await Post.find();
+    res.status(201).json(posts);
   } catch (err) {
-    res.status(409).json({ message: err.message });
+    console.error("Error creating post:", err.message);
+    res.status(409).json({ message: "Error creating post", error: err.message });
   }
 };
 
