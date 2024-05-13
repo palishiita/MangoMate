@@ -4,6 +4,7 @@
 
 import mongoose from "mongoose";
 
+// USER
 const userIds = [
   new mongoose.Types.ObjectId(),
   new mongoose.Types.ObjectId(),
@@ -16,274 +17,317 @@ const userIds = [
 ];
 
 export const users = [
-  {
-    _id: userIds[0],
-    firstName: "test",
-    lastName: "me",
-    email: "aaaaaaa@gmail.com",
-    password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p11.jpeg",
-    friends: [],
-    location: "San Fran, CA",
-    occupation: "Software Engineer",
-    viewedProfile: 14561,
-    impressions: 888822,
-    createdAt: 1115211422,
-    updatedAt: 1115211422,
-    __v: 0,
-  },
-  {
-    _id: userIds[1],
-    firstName: "Steve",
-    lastName: "Ralph",
-    email: "thataaa@gmail.com",
-    password: "$!FEAS@!O)_IDJda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p3.jpeg",
-    friends: [],
-    location: "New York, CA",
-    occupation: "Degenerate",
-    viewedProfile: 12351,
-    impressions: 55555,
-    createdAt: 1595589072,
-    updatedAt: 1595589072,
-    __v: 0,
-  },
-  {
-    _id: userIds[2],
-    firstName: "Some",
-    lastName: "Guy",
-    email: "someguy@gmail.com",
-    password: "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-    picturePath: "p4.jpeg",
-    friends: [],
-    location: "Canada, CA",
-    occupation: "Data Scientist Hacker",
-    viewedProfile: 45468,
-    impressions: 19986,
-    createdAt: 1288090662,
-    updatedAt: 1288090662,
-    __v: 0,
-  },
-  {
-    _id: userIds[3],
-    firstName: "Whatcha",
-    lastName: "Doing",
-    email: "whatchadoing@gmail.com",
-    password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p6.jpeg",
-    friends: [],
-    location: "Korea, CA",
-    occupation: "Educator",
-    viewedProfile: 41024,
-    impressions: 55316,
-    createdAt: 1219214568,
-    updatedAt: 1219214568,
-    __v: 0,
-  },
-  {
-    _id: userIds[4],
-    firstName: "Jane",
-    lastName: "Doe",
-    email: "janedoe@gmail.com",
-    password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p5.jpeg",
-    friends: [],
-    location: "Utah, CA",
-    occupation: "Hacker",
-    viewedProfile: 40212,
-    impressions: 7758,
-    createdAt: 1493463661,
-    updatedAt: 1493463661,
-    __v: 0,
-  },
-  {
-    _id: userIds[5],
-    firstName: "Harvey",
-    lastName: "Dunn",
-    email: "harveydunn@gmail.com",
-    password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p7.jpeg",
-    friends: [],
-    location: "Los Angeles, CA",
-    occupation: "Journalist",
-    viewedProfile: 976,
-    impressions: 4658,
-    createdAt: 1381326073,
-    updatedAt: 1381326073,
-    __v: 0,
-  },
-  {
-    _id: userIds[6],
-    firstName: "Carly",
-    lastName: "Vowel",
-    email: "carlyvowel@gmail.com",
-    password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p8.jpeg",
-    friends: [],
-    location: "Chicago, IL",
-    occupation: "Nurse",
-    viewedProfile: 1510,
-    impressions: 77579,
-    createdAt: 1714704324,
-    updatedAt: 1642716557,
-    __v: 0,
-  },
-  {
-    _id: userIds[7],
-    firstName: "Jessica",
-    lastName: "Dunn",
-    email: "jessicadunn@gmail.com",
-    password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
-    picturePath: "p9.jpeg",
-    friends: [],
-    location: "Washington, DC",
-    occupation: "A Student",
-    viewedProfile: 19420,
-    impressions: 82970,
-    createdAt: 1369908044,
-    updatedAt: 1359322268,
-    __v: 0,
-  },
+    {
+        _id: userIds[0],
+        firstName: "Maya",
+        lastName: "Walczik",
+        email: "aaaaaaa@gmail.com",
+        password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p11.jpeg",
+        friends: [],
+        location: "San Fran, CA",
+        occupation: "Software Engineer",
+    },
+    {
+        _id: userIds[1],
+        firstName: "Steve",
+        lastName: "Ralph",
+        email: "thataaa@gmail.com",
+        password: "$!FEAS@!O)_IDJda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p3.jpeg",
+        friends: [],
+        location: "New York, CA",
+        occupation: "Economist",
+    },
+    {
+        _id: userIds[2],
+        firstName: "Tom",
+        lastName: "Harrison",
+        email: "someguy@gmail.com",
+        password: "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        picturePath: "p4.jpeg",
+        friends: [],
+        location: "Canada",
+        occupation: "Data Scientist Hacker",
+    },
+    {
+        _id: userIds[3],
+        firstName: "Whatcha",
+        lastName: "Doing",
+        email: "whatchadoing@gmail.com",
+        password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p6.jpeg",
+        friends: [],
+        location: "Korea",
+        occupation: "Educator",
+    },
+    {
+        _id: userIds[4],
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "janedoe@gmail.com",
+        password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p5.jpeg",
+        friends: [],
+        location: "Utah, CA",
+        occupation: " Machine Learning Engineer",
+    },
+    {
+        _id: userIds[5],
+        firstName: "Harvey",
+        lastName: "Dunn",
+        email: "harveydunn@gmail.com",
+        password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p7.jpeg",
+        friends: [],
+        location: "Los Angeles, CA",
+        occupation: "Journalist",
+    },
+    {
+        _id: userIds[6],
+        firstName: "Carly",
+        lastName: "Vowel",
+        email: "carlyvowel@gmail.com",
+        password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p8.jpeg",
+        friends: [],
+        location: "Chicago, IL",
+        occupation: "Nurse",
+    },
+    {
+        _id: userIds[7],
+        firstName: "Jessica",
+        lastName: "Dunn",
+        email: "jessicadunn@gmail.com",
+        password: "$2b$10$dsasdgsagasda//G9JxQ4bQ8KXf4OAIe/X/AK9skyWUy",
+        picturePath: "p9.jpeg",
+        friends: [],
+        location: "Washington, DC",
+        occupation: "A Student",
+    },
+
 ];
 
-export const posts = [
-  {
-    _id: new mongoose.Types.ObjectId(),
-    userId: userIds[1],
-    firstName: "Steve",
-    lastName: "Ralph",
-    location: "New York, CA",
-    description: "Some really long random description",
-    picturePath: "post1.jpeg",
-    userPicturePath: "p3.jpeg",
-    likes: new Map([
-      [userIds[0], true],
-      [userIds[2], true],
-      [userIds[3], true],
-      [userIds[4], true],
-    ]),
-    comments: [
-      "random comment",
-      "another random comment",
-      "yet another random comment",
-    ],
-  },
-  {
-    _id: new mongoose.Types.ObjectId(),
-    userId: userIds[3],
-    firstName: "Whatcha",
-    lastName: "Doing",
-    location: "Korea, CA",
-    description:
-      "Another really long random description. This one is longer than the previous one.",
-    picturePath: "post2.jpeg",
-    userPicturePath: "p6.jpeg",
-    likes: new Map([
-      [userIds[7], true],
-      [userIds[4], true],
-      [userIds[1], true],
-      [userIds[2], true],
-    ]),
-    comments: [
-      "one more random comment",
-      "and another random comment",
-      "no more random comments",
-      "I lied, one more random comment",
-    ],
-  },
-  {
-    _id: new mongoose.Types.ObjectId(),
-    userId: userIds[4],
-    firstName: "Jane",
-    lastName: "Doe",
-    location: "Utah, CA",
-    description:
-      "This is the last really long random description. This one is longer than the previous one.",
-    picturePath: "post3.jpeg",
-    userPicturePath: "p5.jpeg",
-    likes: new Map([
-      [userIds[1], true],
-      [userIds[6], true],
-      [userIds[3], true],
-      [userIds[5], true],
-    ]),
-    comments: [
-      "one more random comment",
-      "I lied, one more random comment",
-      "I lied again, one more random comment",
-      "Why am I doing this?",
-      "I'm bored",
-    ],
-  },
-  {
-    _id: new mongoose.Types.ObjectId(),
-    userId: userIds[5],
-    firstName: "Harvey",
-    lastName: "Dunn",
-    location: "Los Angeles, CA",
-    description:
-      "This is the last really long random description. This one is longer than the previous one. Man I'm bored. I'm going to keep typing until I run out of things to say.",
-    picturePath: "post4.jpeg",
-    userPicturePath: "p7.jpeg",
-    likes: new Map([
-      [userIds[1], true],
-      [userIds[6], true],
-      [userIds[3], true],
-    ]),
-    comments: [
-      "I lied again, one more random comment",
-      "Why am I doing this?",
-      "I'm bored",
-      "I'm still bored",
-      "All I want to do is play video games",
-      "I'm going to play video games",
-    ],
-  },
-  {
-    _id: new mongoose.Types.ObjectId(),
-    userId: userIds[6],
-    firstName: "Carly",
-    lastName: "Vowel",
-    location: "Chicago, IL",
-    description:
-      "Just a short description. I'm tired of typing. I'm going to play video games now.",
-    picturePath: "post5.jpeg",
-    userPicturePath: "p8.jpeg",
-    likes: new Map([
-      [userIds[1], true],
-      [userIds[3], true],
-      [userIds[5], true],
-      [userIds[7], true],
-    ]),
-    comments: [
-      "I lied again, one more random comment",
-      "Why am I doing this?",
-      "Man I'm bored",
-      "What should I do?",
-      "I'm going to play video games",
-    ],
-  },
-  {
-    _id: new mongoose.Types.ObjectId(),
-    userId: userIds[7],
-    firstName: "Jessica",
-    lastName: "Dunn",
-    location: "Washington, DC",
-    description:
-      "For the last time, I'm going to play video games now. I'm tired of typing. I'm going to play video games now.",
-    picturePath: "post6.jpeg",
-    userPicturePath: "p9.jpeg",
-    likes: new Map([
-      [userIds[1], true],
-      [userIds[2], true],
-    ]),
 
-    comments: [
-      "Can I play video games now?",
-      "No let's actually study",
-      "Never mind, I'm going to play video games",
-      "Stop it.",
-      "Michael, stop it.",
-    ],
-  },
+export const posts = [
+    {
+      _id: new mongoose.Types.ObjectId(),
+      userId: userIds[1],
+      firstName: "Steve",
+      lastName: "Ralph",
+      location: "New York, CA",
+      description: "Yummy delicious food!!",
+      picturePath: "post1.jpeg",
+      userPicturePath: "p3.jpeg",
+      likes: [
+        { userId: userIds[0], liked: true },
+        { userId: userIds[2], liked: true },
+        { userId: userIds[3], liked: true },
+        { userId: userIds[4], liked: true }
+      ],
+      comments: [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          userId: userIds[5],
+          userFirstName: "Jane",
+          userLastName: "Doe",
+          userPicturePath: "p5.jpeg",
+          commentText: "This is an amazing post, Steve!",
+          createdAt: new Date(),
+          replies: [
+            {
+              _id: new mongoose.Types.ObjectId(),
+              userId: userIds[1],
+              userFirstName: "Steve",
+              userLastName: "Ralph",
+              userPicturePath: "p6.jpeg",
+              replyText: "Thanks, Jane!",
+              createdAt: new Date()
+            }
+          ]
+        }
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+
+    {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[0],
+        firstName: "Maya",
+        lastName: "Walczik",
+        location: "San Fran, CA",
+        description: "eggs for breakfast!",
+        picturePath: "post2.jpg",
+        userPicturePath: "p11.jpeg",
+        likes: [
+        { userId: userIds[1], liked: true },
+        { userId: userIds[2], liked: false }
+        ],
+        comments: [
+        {
+            _id: new mongoose.Types.ObjectId(),
+            userId: userIds[1],
+            userFirstName: "Steve",
+            userLastName: "Ralph",
+            userPicturePath: "p3.jpeg",
+            commentText: "Awesome, Maya!",
+            createdAt: new Date(),
+            replies: [
+            {
+                _id: new mongoose.Types.ObjectId(),
+                userId: userIds[2],
+                userFirstName: "Tom",
+                userLastName: "Harrison",
+                userPicturePath: "p4.jpeg",
+                replyText: "Mouth watering xD",
+                createdAt: new Date()
+            }
+            ]
+        }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    },
+
+    {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[2],
+        firstName: "Tom",
+        lastName: "Harrison",
+        location: "Canada, CA",
+        description: "Party on my mind!",
+        picturePath: "post3.jpg",
+        userPicturePath: "p4.jpeg",
+        likes: [
+        { userId: userIds[0], liked: true },
+        { userId: userIds[1], liked: true }
+        ],
+        comments: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    },
+
+    {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[3],
+        firstName: "Whatcha",
+        lastName: "Doing",
+        location: "Korea, CA",
+        description: "This amazing firework up the sky!",
+        picturePath: "post4.jpg",
+        userPicturePath: "p6.jpeg",
+        likes: [
+        { userId: userIds[0], liked: true },
+        { userId: userIds[4], liked: true }
+        ],
+        comments: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    },
+
+    {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[4],
+        firstName: "Jane",
+        lastName: "Doe",
+        location: "Utah, CA",
+        description: "Carnivals!",
+        picturePath: "post5.jpg",
+        userPicturePath: "p5.jpeg",
+        likes: [
+        { userId: userIds[3], liked: true }
+        ],
+        comments: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    },
+
+    {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[5],
+        firstName: "Harvey",
+        lastName: "Dunn",
+        location: "Los Angeles, CA",
+        description: "Sunset over the city skyline is just unbeatable!",
+        picturePath: "post6.jpg",
+        userPicturePath: "p7.jpeg",
+        likes: [
+          { userId: userIds[1], liked: true },
+          { userId: userIds[3], liked: true }
+        ],
+        comments: [
+          {
+            _id: new mongoose.Types.ObjectId(),
+            userId: userIds[0],
+            userFirstName: "Maya",
+            userLastName: "Walczik",
+            userPicturePath: "p11.jpeg",
+            commentText: "Wow, that’s gorgeous! 🌇",
+            createdAt: new Date(),
+            replies: []
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    },
+
+    {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[6],
+        firstName: "Carly",
+        lastName: "Vowel",
+        location: "Chicago, IL",
+        description: "Wedding Season yo!",
+        picturePath: "post7.jpg",
+        userPicturePath: "p8.jpeg",
+        likes: [
+          { userId: userIds[5], liked: true },
+          { userId: userIds[7], liked: true }
+        ],
+        comments: [
+          {
+            _id: new mongoose.Types.ObjectId(),
+            userId: userIds[3],
+            userFirstName: "Whatcha",
+            userLastName: "Doing",
+            userPicturePath: "p6.jpeg",
+            commentText: "WOHOOO!",
+            createdAt: new Date(),
+            replies: []
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+
+
+      {
+        _id: new mongoose.Types.ObjectId(),
+        userId: userIds[7],
+        firstName: "Jessica",
+        lastName: "Dunn",
+        location: "Washington, DC",
+        description: "Congratulations Mr and Mrs Thomson!!!",
+        picturePath: "post8.jpg",
+        userPicturePath: "p9.jpeg",
+        likes: [
+          { userId: userIds[6], liked: true },
+          { userId: userIds[4], liked: true }
+        ],
+        comments: [
+          {
+            _id: new mongoose.Types.ObjectId(),
+            userId: userIds[2],
+            userFirstName: "Tom",
+            userLastName: "Harrison",
+            userPicturePath: "p4.jpeg",
+            commentText: "Cheers mate! Congrats on the wedding Jay.",
+            createdAt: new Date(),
+            replies: []
+          }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }      
 ];

@@ -1,32 +1,25 @@
 //server/controllers/posts.js
+
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 
-/* CREATE */
-// server/controllers/posts.js
-
+/* CREATE POST*/
 export const createPost = async (req, res) => {
   try {
     const { userId, description } = req.body;
-    // Extract filename from the uploaded file
     const picturePath = req.file ? req.file.filename : req.body.picturePath;
 
-    // Log received data for debugging
     console.log("Received Data:", { userId, description, picturePath });
 
-    // Check if any required field is missing
     if (!userId || !description || !picturePath) {
-      console.error("Missing required fields for post creation:", { userId, description, picturePath });
-      return res.status(409).json({ message: "Missing required fields for post creation." });
+      return res.status(400).json({ message: "Missing required fields for post creation." });
     }
 
-    // Fetch the user
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(409).json({ message: "User not found." });
+      return res.status(404).json({ message: "User not found." });
     }
 
-    // Create a new post
     const newPost = new Post({
       userId,
       firstName: user.firstName,
@@ -34,48 +27,50 @@ export const createPost = async (req, res) => {
       location: user.location,
       description,
       userPicturePath: user.picturePath,
-      picturePath, // Set the multimedia file path
+      picturePath,
       likes: {},
       comments: [],
     });
 
-    // Save and return all posts
     await newPost.save();
-    const posts = await Post.find();
-    res.status(201).json(posts);
+    res.status(201).json(newPost);
   } catch (err) {
-    console.error("Error creating post:", err.message);
-    res.status(409).json({ message: "Error creating post", error: err.message });
+    res.status(500).json({ message: "Error creating post", error: err.message });
   }
 };
 
-/* READ */
+/* READ POST */
 export const getFeedPosts = async (req, res) => {
   try {
-    const post = await Post.find();
-    res.status(200).json(post);
+    const posts = await Post.find().lean();
+    res.status(200).json(posts);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const post = await Post.find({ userId });
-    res.status(200).json(post);
+    const posts = await Post.find({ userId }).lean();
+    res.status(200).json(posts);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* UPDATE */
+/* LIKE POST */
 export const likePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
     const post = await Post.findById(id);
-    const isLiked = post.likes.get(userId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const { userId } = req.body;
+    const isLiked = post.likes.get(userId) || false;
 
     if (isLiked) {
       post.likes.delete(userId);
@@ -83,14 +78,116 @@ export const likePost = async (req, res) => {
       post.likes.set(userId, true);
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(
-      id,
-      { likes: post.likes },
-      { new: true }
-    );
-
-    res.status(200).json(updatedPost);
+    await post.save(); // Using save to maintain the integrity of the Map object
+    res.status(200).json(post);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
+};
+
+/* ADD COMMENT TO POST */
+export const addCommentToPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { userId, commentText } = req.body;
+
+    console.log("Received Data:", { userId, postId, commentText });
+    
+    if (!commentText) {
+      return res.status(400).json({ message: "Comment text is required." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const comment = {
+      userId,
+      commentText,
+      userPicturePath: user.picturePath, // Fetch and save current user picture path
+      createdAt: new Date(),
+    };
+
+    post.comments.push(comment);
+    await post.save();
+    res.status(201).json(comment);
+  } catch (err) {
+    res.status(500).json({ message: "Error adding comment", error: err.message });
+  }
+};
+
+
+/* ADD REPLY TO COMMENT */
+export const addReplyToComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const { userId, replyText } = req.body;
+
+    if (!replyText) {
+      return res.status(400).json({ message: "Reply text is required." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    const reply = {
+      userId,
+      replyText,
+      userPicturePath: user.picturePath, // Include current user picture path
+      createdAt: new Date(),
+    };
+
+    comment.replies.push(reply);
+    await post.save();
+    res.status(201).json(reply);
+  } catch (err) {
+    res.status(500).json({ message: "Error adding reply", error: err.message });
+  }
+};
+
+
+/* DELETE */
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findByIdAndDelete(id);
+
+    console.log("Received Data:", { id });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting post", error: err.message });
+  }
+};
+
+export default { 
+  createPost, 
+  getFeedPosts, 
+  getUserPosts, 
+  likePost, 
+  addCommentToPost, 
+  addReplyToComment, 
+  deletePost 
 };

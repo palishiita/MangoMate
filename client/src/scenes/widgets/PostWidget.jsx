@@ -2,18 +2,22 @@
 import {
   ChatBubbleOutlineOutlined,
   ShareOutlined,
+  DeleteOutline
 } from "@mui/icons-material";
 import { Box, IconButton, Typography, InputBase, Button } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
+import React, { useState, useEffect } from 'react'
+import { format } from 'date-fns';
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import mangoUnlikedIcon from "./mango-unliked.png";
 import mangoLikedIcon from "./mango-liked.png";
+import noImage from "./no-image.jpg";
+
 
 const PostWidget = ({
   postId,
@@ -25,16 +29,20 @@ const PostWidget = ({
   userPicturePath,
   likes,
   comments,
+  createdAt,
 }) => {
   const [isComments, setIsComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [replyIndex, setReplyIndex] = useState(-1);
   const [replyText, setReplyText] = useState("");
+  const [commentsList, setCommentsList] = useState(comments); 
+  const loggedInUserId = useSelector((state) => state.user._id);
+  const loggedInUserPicturePath = useSelector((state) => state.user.picturePath);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
-  const loggedInUserId = useSelector((state) => state.user._id);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
+  const postDate = format(new Date(createdAt), "dd-MM-yyyy haaa");
   const primaryColor = "#F4BB44";
 
   const patchLike = async () => {
@@ -50,12 +58,51 @@ const PostWidget = ({
     dispatch(setPost({ post: updatedPost }));
   };
 
+
+  const deletePost = async () => {
+    const url = `http://localhost:3001/posts/${postId}`;
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.ok) {
+      // Post deleted successfully
+    } else {
+      console.error("Failed to delete post");
+    }
+  };
+
   const handleCommentChange = (event) => setNewComment(event.target.value);
+  
   const handleReplyChange = (event) => setReplyText(event.target.value);
 
-  const handlePostComment = () => {
-    // Add your backend comment posting logic here
-    setNewComment("");
+  useEffect(() => {
+    setCommentsList(comments); // Update comments when props change
+  }, [comments]);
+
+  const handlePostComment = async () => {
+    if (!newComment.trim()) return;
+    const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId: loggedInUserId,
+        commentText: newComment,
+        userPicturePath: loggedInUserPicturePath  // Send current user's picture path
+      }),
+    });
+
+    if (response.ok) {
+      const newCommentData = await response.json();
+      setCommentsList([...commentsList, newCommentData]);  // Update comments list with the new comment
+      setNewComment('');
+    } else {
+      console.error('Failed to post comment');
+    }
   };
 
   const handleReply = (index) => setReplyIndex(index);
@@ -70,9 +117,28 @@ const PostWidget = ({
       <Friend
         friendId={postUserId}
         name={name}
-        subtitle={location}
+        subtitle={`${location} • Posted ${postDate}`}
         userPicturePath={userPicturePath}
       />
+
+      <IconButton
+        onClick={deletePost}
+        sx={{
+          color: "red",             // This sets the color of the icon itself
+          backgroundColor: "#ffcccc", // Light red background color
+          borderRadius: "100%",       // Makes the button round
+          marginLeft: 55,
+          "&:hover": {
+            backgroundColor: "#ffaaaa",
+          },
+          padding: "5px"            // Adjust padding to ensure the icon fits well within the circle
+        }}
+        aria-label="Delete Post"
+      >
+        <DeleteOutline />
+      </IconButton>
+
+      
       <Typography color="text.primary" sx={{ mt: "1rem" }}>
         {description}
       </Typography>
@@ -131,7 +197,7 @@ const PostWidget = ({
         </IconButton>
       </FlexBetween>
 
-      {/* Comments Section */}
+      {/* Comments Section */}      
       {isComments && (
         <Box mt="0.5rem">
           {comments.map((comment, index) => (
@@ -149,13 +215,30 @@ const PostWidget = ({
                 justifyContent: "space-between",
               }}
             >
-              <Typography>{comment}</Typography>
+              <Box display="flex" alignItems="center">
+                <img
+                  src={userPicturePath}
+                  alt="Profile"
+                  style={{ width: "30px", height: "30px", borderRadius: "50%", marginRight: "10px" }}
+                  onError={(e) => {
+                      console.error("Error loading image at: ", e.target.src); // Check what src was attempted
+                      e.target.onerror = null;
+                      e.target.src = noImage;
+                  }}
+                
+                />
+
+                <Typography>{comment.text}</Typography>
+              </Box>
+
               {replyIndex === index && (
                 <Box mt="1rem" display="flex" alignItems="center">
                   <InputBase
                     placeholder="Reply..."
                     value={replyText}
                     onChange={handleReplyChange}
+                    id={`replyText-${index}`} // Unique ID, especially important if multiple on the page
+                    name="replyText" // Name attribute for form handling
                     sx={{
                       flexGrow: 1,
                       mr: "1rem",
@@ -202,7 +285,7 @@ const PostWidget = ({
             </Box>
           ))}
           {/* Comment Input */}
-          <Box mt="1rem" display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" mt="1rem">
             <InputBase
               placeholder="Add a comment..."
               value={newComment}
