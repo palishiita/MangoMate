@@ -1,7 +1,6 @@
 // client/src/scenes/widgets/PostWidget.jsx
 import {
   ChatBubbleOutlineOutlined,
-  ShareOutlined,
   DeleteOutline
 } from "@mui/icons-material";
 import { Box, IconButton, Typography, InputBase, Button } from "@mui/material";
@@ -33,12 +32,12 @@ const PostWidget = ({
 }) => {
   const [isComments, setIsComments] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [replyIndex, setReplyIndex] = useState(-1);
-  const [replyText, setReplyText] = useState("");
   const [commentsList, setCommentsList] = useState(comments); 
+  const dispatch = useDispatch();
+  const [replyText, setReplyText] = useState({});
+  const [replyIndex, setReplyIndex] = useState(-1);
   const loggedInUserId = useSelector((state) => state.user._id);
   const loggedInUserPicturePath = useSelector((state) => state.user.picturePath);
-  const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
@@ -74,15 +73,18 @@ const PostWidget = ({
   };
 
   const handleCommentChange = (event) => setNewComment(event.target.value);
-  
-  const handleReplyChange = (event) => setReplyText(event.target.value);
+
+  const handleReplyChange = (event, index) => {
+    const newText = event.target.value;
+    setReplyText(prev => ({ ...prev, [index]: newText }));
+  };
 
   useEffect(() => {
     setCommentsList(comments); // Update comments when props change
   }, [comments]);
 
   const handlePostComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim()) return; // Prevent posting empty or whitespace-only comments
     const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
@@ -95,22 +97,63 @@ const PostWidget = ({
         userPicturePath: loggedInUserPicturePath  // Send current user's picture path
       }),
     });
-
+  
     if (response.ok) {
       const newCommentData = await response.json();
       setCommentsList([...commentsList, newCommentData]);  // Update comments list with the new comment
-      setNewComment('');
+      setNewComment(''); // Clear the input field after posting
     } else {
       console.error('Failed to post comment');
     }
   };
 
-  const handleReply = (index) => setReplyIndex(index);
-  const handlePostReply = () => {
-    // Add your backend reply posting logic here
-    setReplyIndex(-1);
-    setReplyText("");
+  const handlePostReply = async (commentId, index) => {
+    const replyContent = replyText[index]; // Fetch the reply text using the index
+  
+    if (!replyContent || replyContent.trim() === '') {
+      console.error("Reply content is empty or undefined.");
+      alert("Reply cannot be empty.");
+      return;
+    }
+  
+    console.log("Posting reply for comment ID:", commentId, "with text:", replyContent);
+  
+    // Here you would typically make an API call to your server to post the reply
+    try {
+      const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${commentId}/replies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Assuming token is globally available or derived from state
+        },
+        body: JSON.stringify({
+          userId: loggedInUserId,
+          replyText: replyContent,
+          userPicturePath: loggedInUserPicturePath // If you need to send the user's picture path
+        }),
+      });
+  
+      if (response.ok) {
+        const replyData = await response.json();
+        console.log("Reply posted successfully:", replyData);
+        // Update the local state to include the new reply in the display
+        const updatedComments = commentsList.map((comment, i) => {
+          if (i === index) {
+            return { ...comment, replies: [...(comment.replies || []), replyData] };
+          }
+          return comment;
+        });
+        setCommentsList(updatedComments);
+        setReplyText(prev => ({ ...prev, [index]: '' })); // Clear the input field after successful post
+      } else {
+        throw new Error('Failed to post reply');
+      }
+    } catch (error) {
+      console.error("Error posting reply:", error);
+      alert("Failed to post reply. Please try again.");
+    }
   };
+  
 
   return (
     <WidgetWrapper m="2rem 0">
@@ -191,54 +234,57 @@ const PostWidget = ({
             <Typography>{comments.length}</Typography>
           </FlexBetween>
         </FlexBetween>
-
-        <IconButton>
-          <ShareOutlined />
-        </IconButton>
       </FlexBetween>
 
-      {/* Comments Section */}      
+      {/* Comments Section */}
       {isComments && (
         <Box mt="0.5rem">
-          {comments.map((comment, index) => (
+          {commentsList.map((comment, index) => (
             <Box
-              key={index}
+              key={comment._id || index} 
               sx={{
                 backgroundColor: primaryColor,
                 borderRadius: "10px",
                 p: "10px",
                 my: "5px",
-                color: "text.primary",
+                color: "black", // Ensure text color is black for visibility
                 position: "relative",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
             >
-              <Box display="flex" alignItems="center">
+              {/* Main Comment */}
+              <Box sx={{ display: "flex", alignItems: "center", width: "100%", backgroundColor: primaryColor }}>
                 <img
-                  src={userPicturePath}
+                  src={comment.userPicturePath ? `http://localhost:3001/assets/${comment.userPicturePath}` : noImage}
                   alt="Profile"
-                  style={{ width: "30px", height: "30px", borderRadius: "50%", marginRight: "10px" }}
-                  onError={(e) => {
-                      console.error("Error loading image at: ", e.target.src); // Check what src was attempted
-                      e.target.onerror = null;
-                      e.target.src = noImage;
-                  }}
-                
+                  onError={(e) => { e.target.src = noImage; }}
+                  style={{ width: "35px", height: "40px", borderRadius: "50%", marginRight: "10px" }}
                 />
-
-                <Typography>{comment.text}</Typography>
+                <Typography sx={{ flexGrow: 1, color: 'black' }}>{comment.commentText}</Typography>
               </Box>
 
-              {replyIndex === index && (
+              {/* Replies */}
+              {comment.replies && comment.replies.map((reply, replyIndex) => (
+                <Box key={replyIndex} sx={{ display: "flex", alignItems: "center", mt: 1, pl: 4, backgroundColor: "#F0F0F0", width: "95%" }}>
+                  <img
+                    src={reply.userPicturePath ? `http://localhost:3001/assets/${reply.userPicturePath}` : noImage}
+                    alt="Reply Profile"
+                    onError={(e) => { e.target.src = noImage; }}
+                    style={{ width: "30px", height: "35px", borderRadius: "50%", marginRight: "10px" }}
+                  />
+                  <Typography sx={{ color: 'black', flexGrow: 1 }}>{reply.replyText}</Typography>
+                </Box>
+              ))}
+
+              {/* Input for reply */}
+              {replyIndex === index ? (
                 <Box mt="1rem" display="flex" alignItems="center">
                   <InputBase
                     placeholder="Reply..."
-                    value={replyText}
-                    onChange={handleReplyChange}
-                    id={`replyText-${index}`} // Unique ID, especially important if multiple on the page
-                    name="replyText" // Name attribute for form handling
+                    value={replyText[index] || ''}
+                    onChange={(e) => handleReplyChange(e, index)}
                     sx={{
                       flexGrow: 1,
                       mr: "1rem",
@@ -250,7 +296,7 @@ const PostWidget = ({
                   />
                   <Button
                     variant="contained"
-                    onClick={handlePostReply}
+                    onClick={() => handlePostReply(comment._id, index)}
                     sx={{
                       backgroundColor: primaryColor,
                       color: "white",
@@ -259,14 +305,16 @@ const PostWidget = ({
                       height: "30px",
                       py: 0,
                     }}
+
+
+                    
                   >
                     POST
                   </Button>
                 </Box>
-              )}
-              {replyIndex !== index && (
+              ) : (
                 <Button
-                  onClick={() => handleReply(index)}
+                  onClick={() => setReplyIndex(index)}
                   sx={{
                     position: "absolute",
                     bottom: "10px",
@@ -277,6 +325,7 @@ const PostWidget = ({
                     fontSize: "12px",
                     padding: "5px",
                     height: "24px",
+                    alignSelf: "flex-end",
                   }}
                 >
                   Reply
@@ -284,6 +333,7 @@ const PostWidget = ({
               )}
             </Box>
           ))}
+    
           {/* Comment Input */}
           <Box display="flex" alignItems="center" mt="1rem">
             <InputBase

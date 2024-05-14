@@ -1,3 +1,5 @@
+// client/src/slices/index.js
+
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -33,17 +35,45 @@ export const authSlice = createSlice({
     setPosts: (state, action) => {
       state.posts = action.payload.posts;
     },
+    // setPost: (state, action) => {
+    //   if (!action.payload.post) {
+    //     // If post is null, filter it out from the posts array
+    //     state.posts = state.posts.filter(post => post._id !== action.payload.postId);
+    //   } else {
+    //     // Update the post normally
+    //     const updatedPosts = state.posts.map(post => {
+    //       if (post._id === action.payload.post._id) return action.payload.post;
+    //       return post;
+    //     });
+    //     state.posts = updatedPosts;
+    //   }
+    // },
     setPost: (state, action) => {
-      if (!action.payload.post) {
-        // If post is null, filter it out from the posts array
-        state.posts = state.posts.filter(post => post._id !== action.payload.postId);
-      } else {
-        // Update the post normally
-        const updatedPosts = state.posts.map(post => {
-          if (post._id === action.payload.post._id) return action.payload.post;
-          return post;
+      const { type, postId, commentId, comment, reply } = action.payload;
+      if (type === 'update') {
+        state.posts = state.posts.map(p => p._id === postId ? { ...p, ...action.payload.post } : p);
+      } else if (type === 'delete') {
+        state.posts = state.posts.filter(p => p._id !== postId);
+      } else if (type === 'addComment') {
+        state.posts = state.posts.map(p => {
+          if (p._id === postId) {
+            return { ...p, comments: [...p.comments, comment] };
+          }
+          return p;
         });
-        state.posts = updatedPosts;
+      } else if (type === 'addReply') {
+        state.posts = state.posts.map(p => {
+          if (p._id === postId) {
+            const updatedComments = p.comments.map(c => {
+              if (c._id === commentId) {
+                return { ...c, replies: [...c.replies, reply] };
+              }
+              return c;
+            });
+            return { ...p, comments: updatedComments };
+          }
+          return p;
+        });
       }
     },
     updateUserDetails: (state, action) => {

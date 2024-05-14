@@ -91,8 +91,6 @@ export const addCommentToPost = async (req, res) => {
     const { postId } = req.params;
     const { userId, commentText } = req.body;
 
-    console.log("Received Data:", { userId, postId, commentText });
-    
     if (!commentText) {
       return res.status(400).json({ message: "Comment text is required." });
     }
@@ -109,8 +107,10 @@ export const addCommentToPost = async (req, res) => {
 
     const comment = {
       userId,
+      userFirstName: user.firstName,
+      userLastName: user.lastName,
       commentText,
-      userPicturePath: user.picturePath, // Fetch and save current user picture path
+      userPicturePath: user.picturePath,
       createdAt: new Date(),
     };
 
@@ -121,6 +121,7 @@ export const addCommentToPost = async (req, res) => {
     res.status(500).json({ message: "Error adding comment", error: err.message });
   }
 };
+
 
 
 /* ADD REPLY TO COMMENT */
@@ -150,6 +151,8 @@ export const addReplyToComment = async (req, res) => {
 
     const reply = {
       userId,
+      userFirstName: user.firstName,
+      userLastName: user.lastName,
       replyText,
       userPicturePath: user.picturePath, // Include current user picture path
       createdAt: new Date(),
