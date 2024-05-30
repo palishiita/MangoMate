@@ -30,6 +30,18 @@ export const getUserFriends = async (req, res) => {
   }
 };
 
+export const searchUsers = async (req, res) => {
+  const { query } = req.query;
+  try {
+    const users = await User.find({
+      name: { $regex: query, $options: 'i' } // Case insensitive search
+    }).limit(10); // Limit the number of results
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+	
 /* UPDATE */
 export const addRemoveFriend = async (req, res) => {
   try {

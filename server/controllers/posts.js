@@ -3,6 +3,35 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
 
+import util from 'util';
+import { exec } from 'child_process';
+
+const execPromise = util.promisify(exec);
+
+const predictComment = async (commentText) => {
+  try {
+    // Set environment variable
+    process.env.COMMENT_TEXT = commentText;
+
+    // Execute the notebook with nbconvert
+    const command = `jupyter nbconvert --to notebook --execute ml-model/ML-Model.ipynb --output ml-model/output.ipynb --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=1200 --ExecutePreprocessor.allow_errors=True --inplace`;
+    const { stdout, stderr } = await execPromise(command);
+
+    if (stderr) {
+      console.error('stderr:', stderr);
+      return false;
+    }
+
+    // Read the output notebook file to determine if the comment is toxic
+    const output = await fs.readFile('ml-model/output.ipynb', 'utf-8');
+    return output.includes('Toxic');
+  } catch (error) {
+    console.error('Error executing prediction script:', error);
+    return false;
+  }
+};
+
+
 /* CREATE POST*/
 export const createPost = async (req, res) => {
   try {
@@ -85,6 +114,45 @@ export const likePost = async (req, res) => {
   }
 };
 
+
+// /* ADD COMMENT TO POST */
+// export const addCommentToPost = async (req, res) => {
+//   try {
+//     const { postId } = req.params;
+//     const { userId, commentText } = req.body;
+
+//     if (!commentText) {
+//       return res.status(400).json({ message: "Comment text is required." });
+//     }
+
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found." });
+//     }
+
+//     const post = await Post.findById(postId);
+//     if (!post) {
+//       return res.status(404).json({ message: "Post not found" });
+//     }
+
+//     const comment = {
+//       userId,
+//       userFirstName: user.firstName,
+//       userLastName: user.lastName,
+//       commentText,
+//       userPicturePath: user.picturePath,
+//       createdAt: new Date(),
+//     };
+
+//     post.comments.push(comment);
+//     await post.save();
+//     res.status(201).json(comment);
+//   } catch (err) {
+//     res.status(500).json({ message: "Error adding comment", error: err.message });
+//   }
+// };
+
+
 /* ADD COMMENT TO POST */
 export const addCommentToPost = async (req, res) => {
   try {
@@ -93,6 +161,11 @@ export const addCommentToPost = async (req, res) => {
 
     if (!commentText) {
       return res.status(400).json({ message: "Comment text is required." });
+    }
+
+    const isToxic = await predictComment(commentText);
+    if (isToxic) {
+      return res.status(400).json({ message: "The following comment violates terms and conditions of the app." });
     }
 
     const user = await User.findById(userId);
@@ -122,7 +195,47 @@ export const addCommentToPost = async (req, res) => {
   }
 };
 
+// /* ADD REPLY TO COMMENT */
+// export const addReplyToComment = async (req, res) => {
+//   try {
+//     const { postId, commentId } = req.params;
+//     const { userId, replyText } = req.body;
 
+//     if (!replyText) {
+//       return res.status(400).json({ message: "Reply text is required." });
+//     }
+
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found." });
+//     }
+
+//     const post = await Post.findById(postId);
+//     if (!post) {
+//       return res.status(404).json({ message: "Post not found" });
+//     }
+
+//     const comment = post.comments.id(commentId);
+//     if (!comment) {
+//       return res.status(404).json({ message: "Comment not found" });
+//     }
+
+//     const reply = {
+//       userId,
+//       userFirstName: user.firstName,
+//       userLastName: user.lastName,
+//       replyText,
+//       userPicturePath: user.picturePath, // Include current user picture path
+//       createdAt: new Date(),
+//     };
+
+//     comment.replies.push(reply);
+//     await post.save();
+//     res.status(201).json(reply);
+//   } catch (err) {
+//     res.status(500).json({ message: "Error adding reply", error: err.message });
+//   }
+// };
 
 /* ADD REPLY TO COMMENT */
 export const addReplyToComment = async (req, res) => {
@@ -132,6 +245,11 @@ export const addReplyToComment = async (req, res) => {
 
     if (!replyText) {
       return res.status(400).json({ message: "Reply text is required." });
+    }
+
+    const isToxic = await predictComment(replyText);
+    if (isToxic) {
+      return res.status(400).json({ message: "The following reply violates terms and conditions of the app." });
     }
 
     const user = await User.findById(userId);
@@ -154,7 +272,7 @@ export const addReplyToComment = async (req, res) => {
       userFirstName: user.firstName,
       userLastName: user.lastName,
       replyText,
-      userPicturePath: user.picturePath, // Include current user picture path
+      userPicturePath: user.picturePath,
       createdAt: new Date(),
     };
 
@@ -165,7 +283,6 @@ export const addReplyToComment = async (req, res) => {
     res.status(500).json({ message: "Error adding reply", error: err.message });
   }
 };
-
 
 /* DELETE */
 export const deletePost = async (req, res) => {

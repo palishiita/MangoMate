@@ -35,19 +35,6 @@ export const authSlice = createSlice({
     setPosts: (state, action) => {
       state.posts = action.payload.posts;
     },
-    // setPost: (state, action) => {
-    //   if (!action.payload.post) {
-    //     // If post is null, filter it out from the posts array
-    //     state.posts = state.posts.filter(post => post._id !== action.payload.postId);
-    //   } else {
-    //     // Update the post normally
-    //     const updatedPosts = state.posts.map(post => {
-    //       if (post._id === action.payload.post._id) return action.payload.post;
-    //       return post;
-    //     });
-    //     state.posts = updatedPosts;
-    //   }
-    // },
     setPost: (state, action) => {
       const { type, postId, commentId, comment, reply } = action.payload;
       if (type === 'update') {

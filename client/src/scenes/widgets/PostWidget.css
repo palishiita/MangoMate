@@ -1,0 +1,40 @@
+/* PostWidget.css */
+
+.post-widget {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.comment {
+    background-color: #f0a500;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.comment-content {
+    display: flex;
+    align-items: center;
+}
+
+.comment-content img {
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.replies {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.reply {
+    background-color: #e0e0e0;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.reply img {
+    border-radius: 50%;
+    margin-right: 10px;
+}
