@@ -1,44 +1,13 @@
-//server/controllers/posts.js
+// server/controllers/posts.js
+import Post from '../models/Post.js';
+import User from '../models/User.js';
+import { predictComment } from '../ml-model/predict.js';
 
-import Post from "../models/Post.js";
-import User from "../models/User.js";
-
-import util from 'util';
-import { exec } from 'child_process';
-
-const execPromise = util.promisify(exec);
-
-const predictComment = async (commentText) => {
-  try {
-    // Set environment variable
-    process.env.COMMENT_TEXT = commentText;
-
-    // Execute the notebook with nbconvert
-    const command = `jupyter nbconvert --to notebook --execute ml-model/ML-Model.ipynb --output ml-model/output.ipynb --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=1200 --ExecutePreprocessor.allow_errors=True --inplace`;
-    const { stdout, stderr } = await execPromise(command);
-
-    if (stderr) {
-      console.error('stderr:', stderr);
-      return false;
-    }
-
-    // Read the output notebook file to determine if the comment is toxic
-    const output = await fs.readFile('ml-model/output.ipynb', 'utf-8');
-    return output.includes('Toxic');
-  } catch (error) {
-    console.error('Error executing prediction script:', error);
-    return false;
-  }
-};
-
-
-/* CREATE POST*/
+/* CREATE POST */
 export const createPost = async (req, res) => {
   try {
     const { userId, description } = req.body;
     const picturePath = req.file ? req.file.filename : req.body.picturePath;
-
-    console.log("Received Data:", { userId, description, picturePath });
 
     if (!userId || !description || !picturePath) {
       return res.status(400).json({ message: "Missing required fields for post creation." });
@@ -107,51 +76,12 @@ export const likePost = async (req, res) => {
       post.likes.set(userId, true);
     }
 
-    await post.save(); // Using save to maintain the integrity of the Map object
+    await post.save(); 
     res.status(200).json(post);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
-
-// /* ADD COMMENT TO POST */
-// export const addCommentToPost = async (req, res) => {
-//   try {
-//     const { postId } = req.params;
-//     const { userId, commentText } = req.body;
-
-//     if (!commentText) {
-//       return res.status(400).json({ message: "Comment text is required." });
-//     }
-
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found." });
-//     }
-
-//     const post = await Post.findById(postId);
-//     if (!post) {
-//       return res.status(404).json({ message: "Post not found" });
-//     }
-
-//     const comment = {
-//       userId,
-//       userFirstName: user.firstName,
-//       userLastName: user.lastName,
-//       commentText,
-//       userPicturePath: user.picturePath,
-//       createdAt: new Date(),
-//     };
-
-//     post.comments.push(comment);
-//     await post.save();
-//     res.status(201).json(comment);
-//   } catch (err) {
-//     res.status(500).json({ message: "Error adding comment", error: err.message });
-//   }
-// };
-
 
 /* ADD COMMENT TO POST */
 export const addCommentToPost = async (req, res) => {
@@ -194,48 +124,6 @@ export const addCommentToPost = async (req, res) => {
     res.status(500).json({ message: "Error adding comment", error: err.message });
   }
 };
-
-// /* ADD REPLY TO COMMENT */
-// export const addReplyToComment = async (req, res) => {
-//   try {
-//     const { postId, commentId } = req.params;
-//     const { userId, replyText } = req.body;
-
-//     if (!replyText) {
-//       return res.status(400).json({ message: "Reply text is required." });
-//     }
-
-//     const user = await User.findById(userId);
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found." });
-//     }
-
-//     const post = await Post.findById(postId);
-//     if (!post) {
-//       return res.status(404).json({ message: "Post not found" });
-//     }
-
-//     const comment = post.comments.id(commentId);
-//     if (!comment) {
-//       return res.status(404).json({ message: "Comment not found" });
-//     }
-
-//     const reply = {
-//       userId,
-//       userFirstName: user.firstName,
-//       userLastName: user.lastName,
-//       replyText,
-//       userPicturePath: user.picturePath, // Include current user picture path
-//       createdAt: new Date(),
-//     };
-
-//     comment.replies.push(reply);
-//     await post.save();
-//     res.status(201).json(reply);
-//   } catch (err) {
-//     res.status(500).json({ message: "Error adding reply", error: err.message });
-//   }
-// };
 
 /* ADD REPLY TO COMMENT */
 export const addReplyToComment = async (req, res) => {
@@ -284,13 +172,11 @@ export const addReplyToComment = async (req, res) => {
   }
 };
 
-/* DELETE */
+/* DELETE POST */
 export const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
     const post = await Post.findByIdAndDelete(id);
-
-    console.log("Received Data:", { id });
 
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
@@ -302,12 +188,12 @@ export const deletePost = async (req, res) => {
   }
 };
 
-export default { 
-  createPost, 
-  getFeedPosts, 
-  getUserPosts, 
-  likePost, 
-  addCommentToPost, 
-  addReplyToComment, 
-  deletePost 
+export default {
+  createPost,
+  getFeedPosts,
+  getUserPosts,
+  likePost,
+  addCommentToPost,
+  addReplyToComment,
+  deletePost,
 };
