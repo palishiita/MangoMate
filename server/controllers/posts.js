@@ -1,7 +1,17 @@
 // server/controllers/posts.js
 import Post from '../models/Post.js';
 import User from '../models/User.js';
-import { predictComment } from '../ml-model/predict.js';
+import axios from 'axios';
+
+const checkToxicity = async (comment) => {
+  try {
+    const response = await axios.get(`https://www.purgomalum.com/service/containsprofanity?text=${encodeURIComponent(comment)}`);
+    return response.data; // Returns true if profanity is detected, otherwise false
+  } catch (error) {
+    console.error('Error checking comment:', error.message);
+    throw new Error('Error checking comment');
+  }
+};
 
 /* CREATE POST */
 export const createPost = async (req, res) => {
@@ -93,7 +103,7 @@ export const addCommentToPost = async (req, res) => {
       return res.status(400).json({ message: "Comment text is required." });
     }
 
-    const isToxic = await predictComment(commentText);
+    const isToxic = await checkToxicity(commentText);
     if (isToxic) {
       return res.status(400).json({ message: "The following comment violates terms and conditions of the app." });
     }
@@ -135,7 +145,7 @@ export const addReplyToComment = async (req, res) => {
       return res.status(400).json({ message: "Reply text is required." });
     }
 
-    const isToxic = await predictComment(replyText);
+    const isToxic = await checkToxicity(replyText);
     if (isToxic) {
       return res.status(400).json({ message: "The following reply violates terms and conditions of the app." });
     }

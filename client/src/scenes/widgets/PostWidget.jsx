@@ -84,30 +84,6 @@ const PostWidget = ({
     setCommentsList(comments);
   }, [comments]);
 
-  // const handlePostComment = async () => {
-  //   if (!newComment.trim()) return; // Prevent posting empty or whitespace-only comments
-  //   const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': `Bearer ${token}`,
-  //     },
-  //     body: JSON.stringify({
-  //       userId: loggedInUserId,
-  //       commentText: newComment,
-  //       userPicturePath: loggedInUserPicturePath  // Send current user's picture path
-  //     }),
-  //   });
-  
-  //   if (response.ok) {
-  //     const newCommentData = await response.json();
-  //     setCommentsList([...commentsList, newCommentData]);  // Update comments list with the new comment
-  //     setNewComment(''); // Clear the input field after posting
-  //   } else {
-  //     console.error('Failed to post comment');
-  //   }
-  // };
-
   const handlePostComment = async () => {
     if (!newComment.trim()) return;
     const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
@@ -136,53 +112,6 @@ const PostWidget = ({
     }
   };  
 
-  // const handlePostReply = async (commentId, index) => {
-  //   const replyContent = replyText[index]; // Fetch the reply text using the index
-  
-  //   if (!replyContent || replyContent.trim() === '') {
-  //     console.error("Reply content is empty or undefined.");
-  //     alert("Reply cannot be empty.");
-  //     return;
-  //   }
-  
-  //   console.log("Posting reply for comment ID:", commentId, "with text:", replyContent);
-  
-  //   // Here you would typically make an API call to your server to post the reply
-  //   try {
-  //     const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${commentId}/replies`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': `Bearer ${token}`, // Assuming token is globally available or derived from state
-  //       },
-  //       body: JSON.stringify({
-  //         userId: loggedInUserId,
-  //         replyText: replyContent,
-  //         userPicturePath: loggedInUserPicturePath // If you need to send the user's picture path
-  //       }),
-  //     });
-  
-  //     if (response.ok) {
-  //       const replyData = await response.json();
-  //       console.log("Reply posted successfully:", replyData);
-  //       // Update the local state to include the new reply in the display
-  //       const updatedComments = commentsList.map((comment, i) => {
-  //         if (i === index) {
-  //           return { ...comment, replies: [...(comment.replies || []), replyData] };
-  //         }
-  //         return comment;
-  //       });
-  //       setCommentsList(updatedComments);
-  //       setReplyText(prev => ({ ...prev, [index]: '' })); // Clear the input field after successful post
-  //     } else {
-  //       throw new Error('Failed to post reply');
-  //     }
-  //   } catch (error) {
-  //     console.error("Error posting reply:", error);
-  //     alert("Failed to post reply. Please try again.");
-  //   }
-  // };
-
   const handlePostReply = async (commentId, index) => {
     const replyContent = replyText[index]; // Fetch the reply text using the index
   
@@ -194,25 +123,23 @@ const PostWidget = ({
   
     console.log("Posting reply for comment ID:", commentId, "with text:", replyContent);
   
-    // Here you would typically make an API call to your server to post the reply
     try {
       const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${commentId}/replies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Assuming token is globally available or derived from state
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           userId: loggedInUserId,
           replyText: replyContent,
-          userPicturePath: loggedInUserPicturePath // If you need to send the user's picture path
+          userPicturePath: loggedInUserPicturePath 
         }),
       });
   
       if (response.ok) {
         const replyData = await response.json();
         console.log("Reply posted successfully:", replyData);
-        // Update the local state to include the new reply in the display
         const updatedComments = commentsList.map((comment, i) => {
           if (i === index) {
             return { ...comment, replies: [...(comment.replies || []), replyData] };
@@ -235,7 +162,6 @@ const PostWidget = ({
     }
   };
 
-
   const handleClosePopup = () => {
     setIsPopupOpen(false);
     setPopupMessage("");
@@ -253,21 +179,20 @@ const PostWidget = ({
       <IconButton
         onClick={deletePost}
         sx={{
-          color: "red",             // This sets the color of the icon itself
-          backgroundColor: "#ffcccc", // Light red background color
-          borderRadius: "100%",       // Makes the button round
+          color: "red",             
+          backgroundColor: "#ffcccc", 
+          borderRadius: "100%",       
           marginLeft: 55,
           "&:hover": {
             backgroundColor: "#ffaaaa",
           },
-          padding: "5px"            // Adjust padding to ensure the icon fits well within the circle
+          padding: "5px"            
         }}
         aria-label="Delete Post"
       >
         <DeleteOutline />
       </IconButton>
 
-      
       <Typography color="text.primary" sx={{ mt: "1rem" }}>
         {description}
       </Typography>
@@ -335,11 +260,11 @@ const PostWidget = ({
                 borderRadius: "10px",
                 p: "10px",
                 my: "5px",
-                color: "black", // Ensure text color is black for visibility
+                color: "black", 
                 position: "relative",
               }}
             >
-              
+ 
               {/* Main Comment */}
               <Box sx={{ display: "flex", alignItems: "center", width: "100%", backgroundColor: primaryColor }}>
                 <img
