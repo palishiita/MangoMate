@@ -7,7 +7,8 @@ import {
   likePost,
   addCommentToPost,
   addReplyToComment,
-  deletePost
+  deletePost,
+  editPost, // Added this line
 } from "../controllers/posts.js";
 import { verifyToken } from "../middleware/auth.js";
 import upload from "../middleware/upload.js"; 
@@ -29,6 +30,7 @@ router.get("/:userId/posts", verifyToken, getUserPosts);
 
 /* UPDATE */
 router.patch("/:id/like", verifyToken, likePost);
+router.patch("/:id", verifyToken, editPost); // Added this line
 
 /* DELETE */
 router.delete("/:id", verifyToken, deletePost);

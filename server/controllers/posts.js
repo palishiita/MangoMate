@@ -198,6 +198,35 @@ export const deletePost = async (req, res) => {
   }
 };
 
+/* EDIT POST */
+export const editPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { description, location } = req.body;
+
+    console.log("Received data for updating post:", { id, description, location });
+
+    if (!description || !location) {
+      return res.status(400).json({ message: "Description and location are required." });
+    }
+
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    post.description = description;
+    post.location = location;
+
+    await post.save();
+    console.log("Post updated successfully:", post);
+    res.status(200).json(post);
+  } catch (err) {
+    console.error("Error updating post:", err.message);
+    res.status(500).json({ message: "Error editing post", error: err.message });
+  }
+};
+
 export default {
   createPost,
   getFeedPosts,
@@ -206,4 +235,5 @@ export default {
   addCommentToPost,
   addReplyToComment,
   deletePost,
+  editPost,
 };

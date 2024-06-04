@@ -1,16 +1,27 @@
-// client/src/scenes/widgets/PostWidget.jsx
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   ChatBubbleOutlineOutlined,
-  DeleteOutline
+  DeleteOutline,
+  EditOutlined,
 } from "@mui/icons-material";
-import { Box, IconButton, Typography, InputBase, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Typography,
+  InputBase,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+} from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
-import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import mangoUnlikedIcon from "./mango-unliked.png";
@@ -31,7 +42,7 @@ const PostWidget = ({
 }) => {
   const [isComments, setIsComments] = useState(false);
   const [newComment, setNewComment] = useState("");
-  const [commentsList, setCommentsList] = useState(comments); 
+  const [commentsList, setCommentsList] = useState(comments);
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
   const [replyText, setReplyText] = useState({});
@@ -41,10 +52,19 @@ const PostWidget = ({
   const token = useSelector((state) => state.token);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editDescription, setEditDescription] = useState(description);
+  const [editLocation, setEditLocation] = useState(location);
   const isLiked = Boolean(likes[loggedInUserId]);
   const likeCount = Object.keys(likes).length;
   const postDate = format(new Date(createdAt), "dd-MM-yyyy haaa");
   const primaryColor = "#F4BB44";
+
+  useEffect(() => {
+    setCommentsList(comments);
+    setEditDescription(description);
+    setEditLocation(location);
+  }, [comments, description, location]);
 
   const patchLike = async () => {
     const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
@@ -77,20 +97,16 @@ const PostWidget = ({
 
   const handleReplyChange = (event, index) => {
     const newText = event.target.value;
-    setReplyText(prev => ({ ...prev, [index]: newText }));
+    setReplyText((prev) => ({ ...prev, [index]: newText }));
   };
-
-  useEffect(() => {
-    setCommentsList(comments);
-  }, [comments]);
 
   const handlePostComment = async () => {
     if (!newComment.trim()) return;
     const response = await fetch(`http://localhost:3001/posts/${postId}/comments`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         userId: loggedInUserId,
@@ -98,48 +114,45 @@ const PostWidget = ({
         userPicturePath: loggedInUserPicturePath,
       }),
     });
-  
+
     if (response.ok) {
       const newCommentData = await response.json();
       setCommentsList([...commentsList, newCommentData]);
-      setNewComment('');
-      setErrorMessage('');
+      setNewComment("");
+      setErrorMessage("");
     } else {
       const data = await response.json();
       setErrorMessage(data.message);
       setPopupMessage(data.message);
-      setIsPopupOpen(true); 
+      setIsPopupOpen(true);
     }
-  };  
+  };
 
   const handlePostReply = async (commentId, index) => {
-    const replyContent = replyText[index]; // Fetch the reply text using the index
-  
-    if (!replyContent || replyContent.trim() === '') {
+    const replyContent = replyText[index];
+
+    if (!replyContent || replyContent.trim() === "") {
       console.error("Reply content is empty or undefined.");
       alert("Reply cannot be empty.");
       return;
     }
-  
-    console.log("Posting reply for comment ID:", commentId, "with text:", replyContent);
-  
+
     try {
       const response = await fetch(`http://localhost:3001/posts/${postId}/comments/${commentId}/replies`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           userId: loggedInUserId,
           replyText: replyContent,
-          userPicturePath: loggedInUserPicturePath 
+          userPicturePath: loggedInUserPicturePath,
         }),
       });
-  
+
       if (response.ok) {
         const replyData = await response.json();
-        console.log("Reply posted successfully:", replyData);
         const updatedComments = commentsList.map((comment, i) => {
           if (i === index) {
             return { ...comment, replies: [...(comment.replies || []), replyData] };
@@ -147,18 +160,41 @@ const PostWidget = ({
           return comment;
         });
         setCommentsList(updatedComments);
-        setReplyText(prev => ({ ...prev, [index]: '' })); // Clear the input field after successful post
-        setErrorMessage(''); // Clear error message
+        setReplyText((prev) => ({ ...prev, [index]: "" }));
+        setErrorMessage("");
       } else {
         const data = await response.json();
-        console.error('Failed to post reply:', data.message);
         setErrorMessage(data.message);
         setPopupMessage(data.message);
-        setIsPopupOpen(true); // Show popup for toxic comments
+        setIsPopupOpen(true);
       }
     } catch (error) {
       console.error("Error posting reply:", error);
       alert("Failed to post reply. Please try again.");
+    }
+  };
+
+  const handleEditPost = async () => {
+    console.log("Updating post:", { description: editDescription, location: editLocation });
+    const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        description: editDescription,
+        location: editLocation,
+      }),
+    });
+
+    if (response.ok) {
+      const updatedPost = await response.json();
+      console.log("Updated post received from server:", updatedPost);
+      dispatch(setPost({ post: updatedPost }));
+      setIsEditDialogOpen(false);
+    } else {
+      console.error("Failed to edit post");
     }
   };
 
@@ -179,25 +215,42 @@ const PostWidget = ({
       <IconButton
         onClick={deletePost}
         sx={{
-          color: "red",             
-          backgroundColor: "#ffcccc", 
-          borderRadius: "100%",       
+          color: "red",
+          backgroundColor: "#ffcccc",
+          borderRadius: "100%",
           marginLeft: 55,
           "&:hover": {
             backgroundColor: "#ffaaaa",
           },
-          padding: "5px"            
+          padding: "5px",
         }}
         aria-label="Delete Post"
       >
         <DeleteOutline />
       </IconButton>
 
+      <IconButton
+        onClick={() => setIsEditDialogOpen(true)}
+        sx={{
+          color: "blue",
+          backgroundColor: "#ccccff",
+          borderRadius: "100%",
+          marginLeft: 55,
+          marginTop: 1,
+          "&:hover": {
+            backgroundColor: "#aaaaff",
+          },
+          padding: "5px",
+        }}
+        aria-label="Edit Post"
+      >
+        <EditOutlined />
+      </IconButton>
+
       <Typography color="text.primary" sx={{ mt: "1rem" }}>
         {description}
       </Typography>
 
-      {/* Display Image */}
       {picturePath && picturePath.match(/\.(jpeg|jpg|png)$/) && (
         <img
           width="100%"
@@ -208,7 +261,6 @@ const PostWidget = ({
         />
       )}
 
-      {/* Display Video */}
       {picturePath && picturePath.match(/\.(mp4|avi)$/) && (
         <video
           width="100%"
@@ -219,7 +271,6 @@ const PostWidget = ({
         />
       )}
 
-      {/* Display Audio */}
       {picturePath && picturePath.match(/\.(mp3|wav)$/) && (
         <AudioPlayer
           src={`http://localhost:3001/assets/${picturePath}`}
@@ -228,12 +279,15 @@ const PostWidget = ({
         />
       )}
 
-      {/* Likes and Comments Section */}
       <FlexBetween mt="0.25rem">
         <FlexBetween gap="1rem">
           <FlexBetween gap="0.3rem">
             <IconButton onClick={patchLike}>
-              <img src={isLiked ? mangoLikedIcon : mangoUnlikedIcon} alt="Mango" style={{ width: "24px", height: "24px", color: primaryColor }} />
+              <img
+                src={isLiked ? mangoLikedIcon : mangoUnlikedIcon}
+                alt="Mango"
+                style={{ width: "24px", height: "24px", color: primaryColor }}
+              />
             </IconButton>
             <Typography>{likeCount}</Typography>
           </FlexBetween>
@@ -247,54 +301,56 @@ const PostWidget = ({
         </FlexBetween>
       </FlexBetween>
 
-
-      {/* Comments Section */}
       {isComments && (
         <Box mt="0.5rem">
           {errorMessage && <Typography color="error">{errorMessage}</Typography>}
           {commentsList.map((comment, index) => (
             <Box
-              key={comment._id || index} 
+              key={comment._id || index}
               sx={{
                 backgroundColor: primaryColor,
                 borderRadius: "10px",
                 p: "10px",
                 my: "5px",
-                color: "black", 
+                color: "black",
                 position: "relative",
               }}
             >
- 
-              {/* Main Comment */}
               <Box sx={{ display: "flex", alignItems: "center", width: "100%", backgroundColor: primaryColor }}>
                 <img
                   src={comment.userPicturePath ? `http://localhost:3001/assets/${comment.userPicturePath}` : noImage}
                   alt="Profile"
-                  onError={(e) => { e.target.src = noImage; }}
+                  onError={(e) => {
+                    e.target.src = noImage;
+                  }}
                   style={{ width: "35px", height: "40px", borderRadius: "50%", marginRight: "10px" }}
                 />
-                <Typography sx={{ flexGrow: 1, color: 'black' }}>{comment.commentText}</Typography>
+                <Typography sx={{ flexGrow: 1, color: "black" }}>{comment.commentText}</Typography>
               </Box>
 
-              {/* Replies */}
-              {comment.replies && comment.replies.map((reply, replyIndex) => (
-                <Box key={replyIndex} sx={{ display: "flex", alignItems: "center", mt: 1, pl: 4, backgroundColor: "#F0F0F0", borderRadius: "10px", p: "10px" }}>
-                  <img
-                    src={reply.userPicturePath ? `http://localhost:3001/assets/${reply.userPicturePath}` : noImage}
-                    alt="Reply Profile"
-                    onError={(e) => { e.target.src = noImage; }}
-                    style={{ width: "30px", height: "35px", borderRadius: "50%", marginRight: "10px" }}
-                  />
-                  <Typography sx={{ color: 'black', flexGrow: 1 }}>{reply.replyText}</Typography>
-                </Box>
-              ))}
+              {comment.replies &&
+                comment.replies.map((reply, replyIndex) => (
+                  <Box
+                    key={replyIndex}
+                    sx={{ display: "flex", alignItems: "center", mt: 1, pl: 4, backgroundColor: "#F0F0F0", borderRadius: "10px", p: "10px" }}
+                  >
+                    <img
+                      src={reply.userPicturePath ? `http://localhost:3001/assets/${reply.userPicturePath}` : noImage}
+                      alt="Reply Profile"
+                      onError={(e) => {
+                        e.target.src = noImage;
+                      }}
+                      style={{ width: "30px", height: "35px", borderRadius: "50%", marginRight: "10px" }}
+                    />
+                    <Typography sx={{ color: "black", flexGrow: 1 }}>{reply.replyText}</Typography>
+                  </Box>
+                ))}
 
-              {/* Input for reply */}
               {replyIndex === index ? (
                 <Box mt="1rem" display="flex" alignItems="center">
                   <InputBase
                     placeholder="Reply..."
-                    value={replyText[index] || ''}
+                    value={replyText[index] || ""}
                     onChange={(e) => handleReplyChange(e, index)}
                     sx={{
                       flexGrow: 1,
@@ -341,8 +397,7 @@ const PostWidget = ({
               )}
             </Box>
           ))}
-    
-          {/* Comment Input */}
+
           <Box display="flex" alignItems="center" mt="1rem">
             <InputBase
               placeholder="Add a comment..."
@@ -375,16 +430,45 @@ const PostWidget = ({
         </Box>
       )}
 
+      <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
+        <DialogTitle>Edit Post</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Description"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Location"
+            value={editLocation}
+            onChange={(e) => setEditLocation(e.target.value)}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsEditDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleEditPost} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog open={isPopupOpen} onClose={handleClosePopup}>
         <DialogTitle>Warning</DialogTitle>
         <DialogContent>
           <Typography>{popupMessage}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClosePopup} color="primary">Close</Button>
+          <Button onClick={handleClosePopup} color="primary">
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
-
     </WidgetWrapper>
   );
 };
