@@ -2,6 +2,23 @@
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import axios from 'axios';
+import dotenv from 'dotenv';
+
+
+dotenv.config();
+
+const ML_API_URL = process.env.ML_API_URL;
+
+// const checkToxicity = async (comment) => {
+//   try {
+//     const response = await axios.post(ML_API_URL, { text: comment });
+//     console.log('API response:', response.data); // Add this line for debugging
+//     return response.data.response.toxic; // Adjust based on your API response
+//   } catch (error) {
+//     console.error('Error checking comment:', error.message);
+//     throw new Error('Error checking comment');
+//   }
+// };
 
 const checkToxicity = async (comment) => {
   try {

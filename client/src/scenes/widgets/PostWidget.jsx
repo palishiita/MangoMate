@@ -47,6 +47,7 @@ const PostWidget = ({
   const dispatch = useDispatch();
   const [replyText, setReplyText] = useState({});
   const [replyIndex, setReplyIndex] = useState(-1);
+  const [repliesVisible, setRepliesVisible] = useState({});
   const loggedInUserId = useSelector((state) => state.user._id);
   const loggedInUserPicturePath = useSelector((state) => state.user.picturePath);
   const token = useSelector((state) => state.token);
@@ -154,7 +155,7 @@ const PostWidget = ({
       if (response.ok) {
         const replyData = await response.json();
         const updatedComments = commentsList.map((comment, i) => {
-          if (i === index) {
+          if (comment._id === commentId) {
             return { ...comment, replies: [...(comment.replies || []), replyData] };
           }
           return comment;
@@ -175,7 +176,6 @@ const PostWidget = ({
   };
 
   const handleEditPost = async () => {
-    console.log("Updating post:", { description: editDescription, location: editLocation });
     const response = await fetch(`http://localhost:3001/posts/${postId}`, {
       method: "PATCH",
       headers: {
@@ -190,7 +190,6 @@ const PostWidget = ({
 
     if (response.ok) {
       const updatedPost = await response.json();
-      console.log("Updated post received from server:", updatedPost);
       dispatch(setPost({ post: updatedPost }));
       setIsEditDialogOpen(false);
     } else {
@@ -201,6 +200,10 @@ const PostWidget = ({
   const handleClosePopup = () => {
     setIsPopupOpen(false);
     setPopupMessage("");
+  };
+
+  const toggleRepliesVisibility = (index) => {
+    setRepliesVisible((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   return (
@@ -328,7 +331,8 @@ const PostWidget = ({
                 <Typography sx={{ flexGrow: 1, color: "black" }}>{comment.commentText}</Typography>
               </Box>
 
-              {comment.replies &&
+              {repliesVisible[index] &&
+                comment.replies &&
                 comment.replies.map((reply, replyIndex) => (
                   <Box
                     key={replyIndex}
@@ -393,6 +397,26 @@ const PostWidget = ({
                   }}
                 >
                   Reply
+                </Button>
+              )}
+
+              {comment.replies && comment.replies.length > 0 && (
+                <Button
+                  onClick={() => toggleRepliesVisibility(index)}
+                  sx={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    backgroundColor: "#FFF",
+                    color: primaryColor,
+                    borderRadius: "5px",
+                    fontSize: "12px",
+                    padding: "5px",
+                    height: "24px",
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  {repliesVisible[index] ? "Hide Replies" : "Show Replies"}
                 </Button>
               )}
             </Box>
